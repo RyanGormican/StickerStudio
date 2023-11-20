@@ -38,8 +38,8 @@ function App() {
 
   const handleMouseMove = (event) => {
   if (selectedSticker) {
-    const x = event.clientX - (6.5 * window.innerWidth) / 200; 
-    const y = event.clientY - (6.5 * window.innerHeight) / 200; 
+    const x = event.clientX - (10.5 * window.innerWidth) / 200; 
+    const y = event.clientY - (10.5 * window.innerHeight) / 200; 
 
     setPreviewSticker({ sticker: selectedSticker, x, y });
   }
@@ -47,8 +47,8 @@ function App() {
 
  const handleTopContainerClick = (event) => {
   if (selectedSticker) {
-    const x = event.clientX - (6.5 * window.innerWidth) / 200; 
-    const y = event.clientY - (6.5 * window.innerHeight) / 200; 
+    const x = event.clientX - (10.5 * window.innerWidth) / 200; 
+    const y = event.clientY - (10.5 * window.innerHeight) / 200; 
 
     setPlacedStickers([...placedStickers, { sticker: selectedSticker, x, y }]);
     setPreviewSticker(null);
@@ -71,7 +71,7 @@ function App() {
 
 
    const downloadImage = () => {
-    const topContainer = document.getElementById('top-container');
+    const topContainer = document.getElementById('container-fluid');
 
     if (topContainer) {
       html2canvas(topContainer).then((canvas) => {
@@ -96,6 +96,7 @@ function App() {
     <div className="App" onMouseMove={handleMouseMove}>
       <div
         className="container-fluid"
+        id="container-fluid"
         style={{
           height: '80vh',
           ...topContainerStyle,
@@ -111,8 +112,8 @@ function App() {
             className="selected-sticker"
             style={{
               position: 'absolute',
-              width: '6.5vw',
-              height: '6.5vh',
+              width: '10.5vw',
+              height: '10.5vh',
               left: `${placedSticker.x}px`,
               top: `${placedSticker.y}px`,
               opacity: 1,
@@ -126,8 +127,8 @@ function App() {
             className="selected-sticker"
             style={{
               position: 'absolute',
-              width: '6.5vw',
-              height: '6.5vh',
+              width: '10.5vw',
+              height: '10.5vh',
               left: `${previewSticker.x}px`,
               top: `${previewSticker.y}px`,
               opacity: 0.7,

@@ -16,7 +16,7 @@
 }
 
 .container-fixed-bottom {
-  height: 20vh;
+  height: 16vh;
   overflow-y: auto;
   background-color: #282c34;
 }
@@ -41,8 +41,8 @@
 }
 .selected-sticker {
   position: absolute;
-  width: 6.5vw;
-  height: 6.5vh;
+  width: 10.5vw;
+  height: 10.5vh;
   opacity: 0.7; 
   pointer-events: none; 
   }
