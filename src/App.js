@@ -36,24 +36,54 @@ function App() {
   };
 
   const handleMouseMove = (event) => {
-    if (selectedSticker) {
-      const x = event.clientX;
-      const y = event.clientY;
+  if (selectedSticker) {
+    const x = event.clientX - (6.5 * window.innerWidth) / 200; 
+    const y = event.clientY - (6.5 * window.innerHeight) / 200; 
 
-      setPreviewSticker({ sticker: selectedSticker, x, y });
+    setPreviewSticker({ sticker: selectedSticker, x, y });
+  }
+};
+
+ const handleTopContainerClick = (event) => {
+  if (selectedSticker) {
+    const x = event.clientX - (6.5 * window.innerWidth) / 200; 
+    const y = event.clientY - (6.5 * window.innerHeight) / 200; 
+
+    setPlacedStickers([...placedStickers, { sticker: selectedSticker, x, y }]);
+    setPreviewSticker(null);
+  }
+};
+  const handleKeyDown = (event) => {
+    if (event.shiftKey) {
+      switch (event.key) {
+        case 'C':
+          setPlacedStickers([]);
+          break;
+        case 'D':
+          downloadImage();
+          break;
+        default:
+          break;
+      }
     }
   };
 
-  const handleTopContainerClick = (event) => {
-    if (selectedSticker) {
-      const x = event.clientX;
-      const y = event.clientY;
 
-      setPlacedStickers([...placedStickers, { sticker: selectedSticker, x, y }]);
-      setPreviewSticker(null); // Clear the preview sticker after placing
-    }
+  const downloadImage = () => {
+    html2canvas(document.getElementById('top-container')).then((canvas) => {
+      canvas.toBlob((blob) => {
+        saveAs(blob, 'image.png');
+      });
+    });
   };
 
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
   return (
     <div className="App" onMouseMove={handleMouseMove}>
       <div
