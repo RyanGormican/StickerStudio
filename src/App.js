@@ -78,6 +78,7 @@ const stretchBackground = () => {
       switch (event.key) {
         case 'B':
         setButtonsVisible(!buttonsVisible);
+        break;
         case 'C':
           setPlacedStickers([]);
           break;
@@ -202,6 +203,7 @@ const stretchBackground = () => {
                   alt={sticker.alt}
                   className={`image clickable ${selectedSticker === sticker ? 'selected' : ''}`}
                   onClick={() => handleStickerClick(sticker)}
+                  style={selectedSticker.alt === sticker.alt ? { border: '2px solid white' } : {}}
                 />
               </div>
             ))}
