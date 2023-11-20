@@ -13,6 +13,7 @@ function App() {
   const [previewSticker, setPreviewSticker] = useState(null);
   const [topContainerStyle, setTopContainerStyle] = useState({ background: 'none' });
   const [isCursorInside, setIsCursorInside] = useState(false);
+   const [containerClass, setContainerClass] = useState('');
   const backgrounds = backgroundContext.keys().map((key, index) => ({
     src: backgroundContext(key),
     alt: `Background ${index + 1}`,
@@ -30,6 +31,7 @@ function App() {
       backgroundSize: '100% 100%', 
       backgroundPosition: 'center',
     });
+        setContainerClass('stretched-background');
   };
 
   const handleStickerClick = (sticker) => {
@@ -102,8 +104,8 @@ function App() {
   }, [handleKeyDown]);
   return (
     <div className="App" onMouseMove={handleMouseMove}>
-      <div
-        className="container-fluid"
+     <div
+        className={`container-fluid ${containerClass}`}
         id="container-fluid"
         style={{
           height: '80vh',
