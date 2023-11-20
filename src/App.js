@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-
+import html2canvas from 'html2canvas';
+import { saveAs } from 'file-saver';
 function App() {
   const backgroundContext = require.context('./Backgrounds', false, /\.(png|jpe?g|svg)$/);
   const stickerContext = require.context('./Stickers', false, /\.(png|jpe?g|svg)$/);
@@ -69,13 +70,20 @@ function App() {
   };
 
 
-  const downloadImage = () => {
-    html2canvas(document.getElementById('top-container')).then((canvas) => {
-      canvas.toBlob((blob) => {
-        saveAs(blob, 'image.png');
+   const downloadImage = () => {
+    const topContainer = document.getElementById('top-container');
+
+    if (topContainer) {
+      html2canvas(topContainer).then((canvas) => {
+        canvas.toBlob((blob) => {
+          saveAs(blob, 'image.png');
+        });
       });
-    });
+    } else {
+
+    }
   };
+
 
 
   useEffect(() => {
