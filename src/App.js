@@ -8,6 +8,7 @@ function App() {
   const stickerContext = require.context('./Stickers', false, /\.(png|jpe?g|svg)$/);
   const [view, setView] = useState('stickers');
   const [selectedBackground, setSelectedBackground] = useState(null);
+  const [backgroundImage, setBackgroundImage] = useState(null);
   const [selectedSticker, setSelectedSticker] = useState(null);
   const [placedStickers, setPlacedStickers] = useState([]);
   const [previewSticker, setPreviewSticker] = useState(null);
@@ -24,15 +25,30 @@ function App() {
     alt: `Sticker ${index + 1}`,
   }));
 
-  const handleBackgroundClick = (background) => {
-    setSelectedBackground(background);
-    setTopContainerStyle({
-      background: `url(${background.src})`,
-      backgroundSize: '100% 100%', 
-      backgroundPosition: 'center',
-    });
-        setContainerClass('stretched-background');
-  };
+const handleBackgroundClick = (background) => {
+  setSelectedBackground(background);
+
+  if (background) {
+    setBackgroundImage(background.src);
+
+    const img = new Image();
+    img.src = background.src;
+    img.onload = () => {
+      stretchBackground();
+    };
+  }
+};
+
+const stretchBackground = () => {
+  const container = document.getElementById('container-fluid');
+
+  if (container) {
+    container.style.backgroundImage = `url(${backgroundImage})`;
+    container.style.backgroundSize = '100% 100%';
+    container.style.backgroundPosition = 'center';
+  }
+};
+
 
   const handleStickerClick = (sticker) => {
     setSelectedSticker(sticker);
