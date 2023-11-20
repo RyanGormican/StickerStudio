@@ -55,7 +55,7 @@ function App() {
         </div>
       </div>
 
-      <div className="container-fixed-bottom>
+      <div className="container-fixed-bottom">
         <div className="row mt-3">
           {view === 'stickers' &&
             stickers.map((sticker, index) => (
