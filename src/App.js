@@ -14,7 +14,8 @@ function App() {
   const [previewSticker, setPreviewSticker] = useState(null);
   const [topContainerStyle, setTopContainerStyle] = useState({ background: 'none' });
   const [isCursorInside, setIsCursorInside] = useState(false);
-   const [containerClass, setContainerClass] = useState('');
+  const [containerClass, setContainerClass] = useState('');
+  const [buttonsVisible, setButtonsVisible] = useState(true);
   const backgrounds = backgroundContext.keys().map((key, index) => ({
     src: backgroundContext(key),
     alt: `Background ${index + 1}`,
@@ -75,6 +76,8 @@ const stretchBackground = () => {
   const handleKeyDown = (event) => {
     if (event.shiftKey) {
       switch (event.key) {
+        case 'B':
+        setButtonsVisible(!buttonsVisible);
         case 'C':
           setPlacedStickers([]);
           break;
@@ -165,27 +168,30 @@ const stretchBackground = () => {
         )}
       </div>
 
-      <div className="row" style={{ backgroundColor: '#282c34' }}>
-        <div className="col-md-6">
-          <button
-            className={`btn btn-${view === 'stickers' ? 'primary' : 'secondary'} btn-block`}
-            onClick={() => {
-              setView('stickers');
-            }}
-          >
-            Stickers
-          </button>
-        </div>
-        <div className="col-md-6">
-          <button
-            className={`btn btn-${view === 'backgrounds' ? 'primary' : 'secondary'} btn-block`}
-            onClick={() => setView('backgrounds')}
-          >
-            Backgrounds
-          </button>
-        </div>
-      </div>
+ 
 
+      <div>
+       <div className="row" style={{ backgroundColor: '#282c34',  }}>
+      <div className="col-md-6">
+        <button
+          className={`btn btn-${view === 'stickers' ? 'primary' : 'secondary'} btn-block` }
+          style={{visibility: buttonsVisible ? 'visible' : 'hidden'}}
+          onClick={() => {
+            setView('stickers');
+          }}
+        >
+          Stickers
+        </button>
+      </div>
+      <div className="col-md-6" style={{visibility: buttonsVisible ? 'visible' : 'hidden'}}>
+        <button
+          className={`btn btn-${view === 'backgrounds' ? 'primary' : 'secondary'} btn-block`}
+          onClick={() => setView('backgrounds')}
+        >
+          Backgrounds
+        </button>
+      </div>
+    </div>
       <div className="container-fixed-bottom">
         <div className="row mt-3">
           {view === 'stickers' &&
@@ -210,6 +216,7 @@ const stretchBackground = () => {
               </div>
             ))}
         </div>
+      </div>
       </div>
     </div>
   );
