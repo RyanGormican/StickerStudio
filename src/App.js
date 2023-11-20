@@ -8,6 +8,8 @@ function App() {
   const [view, setView] = useState('stickers');
   const [selectedBackground, setSelectedBackground] = useState(null);
   const [selectedSticker, setSelectedSticker] = useState(null);
+  const [placedStickers, setPlacedStickers] = useState([]);
+  const [previewSticker, setPreviewSticker] = useState(null);
   const [topContainerStyle, setTopContainerStyle] = useState({ background: 'none' });
 
   const backgrounds = backgroundContext.keys().map((key, index) => ({
@@ -33,16 +35,22 @@ function App() {
     setSelectedSticker(sticker);
   };
 
-   const handleMouseMove = (event) => {
+  const handleMouseMove = (event) => {
     if (selectedSticker) {
-      const selectedStickerElement = document.getElementById('selected-sticker');
-      if (selectedStickerElement) {
-        const rect = selectedStickerElement.getBoundingClientRect();
-        const x = event.clientX - rect.width / 2;
-        const y = event.clientY - rect.height / 2;
-        selectedStickerElement.style.left = `${x}px`;
-        selectedStickerElement.style.top = `${y}px`;
-      }
+      const x = event.clientX;
+      const y = event.clientY;
+
+      setPreviewSticker({ sticker: selectedSticker, x, y });
+    }
+  };
+
+  const handleTopContainerClick = (event) => {
+    if (selectedSticker) {
+      const x = event.clientX;
+      const y = event.clientY;
+
+      setPlacedStickers([...placedStickers, { sticker: selectedSticker, x, y }]);
+      setPreviewSticker(null); // Clear the preview sticker after placing
     }
   };
 
@@ -53,15 +61,39 @@ function App() {
         style={{
           height: '80vh',
           ...topContainerStyle,
-          position: 'relative', // Added position relative
+          position: 'relative',
         }}
+        onClick={handleTopContainerClick}
       >
-        {selectedSticker && (
+        {placedStickers.map((placedSticker, index) => (
           <img
-            src={selectedSticker.src}
-            alt={selectedSticker.alt}
+            key={index}
+            src={placedSticker.sticker.src}
+            alt={placedSticker.sticker.alt}
             className="selected-sticker"
-            id="selected-sticker"
+            style={{
+              position: 'absolute',
+              width: '6.5vw',
+              height: '6.5vh',
+              left: `${placedSticker.x}px`,
+              top: `${placedSticker.y}px`,
+              opacity: 1,
+            }}
+          />
+        ))}
+        {previewSticker && (
+          <img
+            src={previewSticker.sticker.src}
+            alt={previewSticker.sticker.alt}
+            className="selected-sticker"
+            style={{
+              position: 'absolute',
+              width: '6.5vw',
+              height: '6.5vh',
+              left: `${previewSticker.x}px`,
+              top: `${previewSticker.y}px`,
+              opacity: 0.7,
+            }}
           />
         )}
       </div>
