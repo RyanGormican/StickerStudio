@@ -49,3 +49,6 @@
 .hover-outline {
   outline: 2px solid #61dafb;
 }
+.stretched-background {
+  background-size: 100% 100%;
+}

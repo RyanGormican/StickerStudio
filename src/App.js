@@ -12,7 +12,7 @@ function App() {
   const [placedStickers, setPlacedStickers] = useState([]);
   const [previewSticker, setPreviewSticker] = useState(null);
   const [topContainerStyle, setTopContainerStyle] = useState({ background: 'none' });
-
+  const [isCursorInside, setIsCursorInside] = useState(false);
   const backgrounds = backgroundContext.keys().map((key, index) => ({
     src: backgroundContext(key),
     alt: `Background ${index + 1}`,
@@ -27,7 +27,7 @@ function App() {
     setSelectedBackground(background);
     setTopContainerStyle({
       background: `url(${background.src})`,
-      backgroundSize: 'cover',
+      backgroundSize: '100% 100%', 
       backgroundPosition: 'center',
     });
   };
@@ -85,6 +85,14 @@ function App() {
   };
 
 
+  const handleContainerEnter = () => {
+    setIsCursorInside(true);
+  };
+
+  const handleContainerLeave = () => {
+    setIsCursorInside(false);
+  };
+
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
@@ -103,6 +111,8 @@ function App() {
           position: 'relative',
         }}
         onClick={handleTopContainerClick}
+        onMouseEnter={handleContainerEnter}
+        onMouseLeave={handleContainerLeave}
       >
         {placedStickers.map((placedSticker, index) => (
           <img
@@ -124,14 +134,14 @@ function App() {
           <img
             src={previewSticker.sticker.src}
             alt={previewSticker.sticker.alt}
-            className="selected-sticker"
+            className={`selected-sticker`}
             style={{
               position: 'absolute',
               width: '10.5vw',
               height: '10.5vh',
               left: `${previewSticker.x}px`,
               top: `${previewSticker.y}px`,
-              opacity: 0.7,
+              opacity: isCursorInside ? 0.7 : 0,
             }}
           />
         )}
