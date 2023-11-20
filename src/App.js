@@ -73,6 +73,14 @@ const stretchBackground = () => {
     setPreviewSticker(null);
   }
 };
+
+const undoLastSticker = () => {
+  setPlacedStickers((prevStickers) => {
+    const updatedStickers = [...prevStickers];
+    updatedStickers.pop();
+    return updatedStickers;
+  });
+};
   const handleKeyDown = (event) => {
     if (event.shiftKey) {
       switch (event.key) {
@@ -85,6 +93,9 @@ const stretchBackground = () => {
         case 'D':
           downloadImage();
           break;
+        case 'Z':
+        undoLastSticker();
+        break;
         default:
           break;
       }
@@ -163,7 +174,7 @@ const stretchBackground = () => {
               height: '10.5vh',
               left: `${previewSticker.x}px`,
               top: `${previewSticker.y}px`,
-              opacity: isCursorInside ? 0.7 : 0,
+              opacity: isCursorInside ? 0.5 : 0,
             }}
           />
         )}
@@ -203,7 +214,7 @@ const stretchBackground = () => {
                   alt={sticker.alt}
                   className={`image clickable ${selectedSticker === sticker ? 'selected' : ''}`}
                   onClick={() => handleStickerClick(sticker)}
-                  style={selectedSticker.alt === sticker.alt ? { border: '2px solid white' } : {}}
+                  style={selectedSticker && selectedSticker.alt === sticker.alt ? { border: '2px solid white' } : {}}
                 />
               </div>
             ))}
