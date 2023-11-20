@@ -12,7 +12,7 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
-  overflow-x: hidden; /* Add this line to prevent horizontal scrolling */
+  overflow-x: hidden; 
 }
 
 .container-fixed-bottom {
@@ -22,9 +22,9 @@
 }
 
 .image {
-  width: 75%;
-  height: 75%;
-  object-fit: cover;
+  width: 50%;
+  height: 50%;
+
 }
 
 .row {
@@ -32,8 +32,10 @@
   margin-left: 0;
 }
 
-/* Add this style to remove the gutters on the row */
 .container {
   padding-right: 0;
   padding-left: 0;
+}
+.selected {
+  border: 2px solid white; 
 }

@@ -7,6 +7,7 @@ function App() {
   const stickerContext = require.context('./Stickers', false, /\.(png|jpe?g|svg)$/);
   const [view, setView] = useState('stickers');
   const [selectedBackground, setSelectedBackground] = useState(null);
+  const [selectedSticker, setSelectedSticker] = useState(null);
   const [topContainerStyle, setTopContainerStyle] = useState({ background: 'none' });
 
   const backgrounds = backgroundContext.keys().map((key, index) => ({
@@ -28,11 +29,13 @@ function App() {
     });
   };
 
+  const handleStickerClick = (sticker) => {
+    setSelectedSticker(sticker);
+  };
+
   return (
     <div className="App">
-      <div className="container-fluid" style={{ height: '80vh', ...topContainerStyle }}>
-
-      </div>
+      <div className="container-fluid" style={{ height: '80vh', ...topContainerStyle }}></div>
 
       <div className="row" style={{ backgroundColor: '#282c34' }}>
         <div className="col-md-6">
@@ -60,7 +63,12 @@ function App() {
           {view === 'stickers' &&
             stickers.map((sticker, index) => (
               <div key={index} className="col-md-2">
-                <img src={sticker.src} alt={sticker.alt} className="image" />
+                <img
+                  src={sticker.src}
+                  alt={sticker.alt}
+                  className={`image clickable ${selectedSticker === sticker ? 'selected' : ''}`}
+                  onClick={() => handleStickerClick(sticker)}
+                />
               </div>
             ))}
           {view === 'backgrounds' &&
