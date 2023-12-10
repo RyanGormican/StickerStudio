@@ -26,7 +26,10 @@
   height: 50%;
 
 }
-
+.imageB{
+	width:150%;
+	height:150%;
+}
 .row {
   margin-right: 0;
   margin-left: 0;

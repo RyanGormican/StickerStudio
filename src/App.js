@@ -28,67 +28,77 @@ function App() {
     alt: `Sticker ${index + 1}`,
   }));
 
-const handleBackgroundClick = (background) => {
-  setSelectedBackground(background);
+  const handleBackgroundClick = (background) => {
+    setSelectedBackground(background);
 
-  if (background) {
-    setBackgroundImage(background.src);
+    if (background) {
+      setBackgroundImage(background.src);
 
-    const img = new Image();
-    img.src = background.src;
-    img.onload = () => {
-      stretchBackground();
-    };
-  }
-};
+      const img = new Image();
+      img.src = background.src;
+      img.onload = () => {
+        stretchBackground();
+      };
+    }
+  };
 
-const stretchBackground = () => {
-  const container = document.getElementById('container-fluid');
+  const stretchBackground = () => {
+    const container = document.getElementById('container-fluid');
 
-  if (container) {
-    container.style.backgroundImage = `url(${backgroundImage})`;
-    container.style.backgroundSize = '100% 100%';
-    container.style.backgroundPosition = 'center';
-  }
-};
-
+    if (container) {
+      container.style.backgroundImage = `url(${backgroundImage})`;
+      container.style.backgroundSize = '100% 100%';
+      container.style.backgroundPosition = 'center';
+    }
+  };
 
   const handleStickerClick = (sticker) => {
-    setSelectedSticker(sticker);
+  console.log(selectedSticker);
+  console.log(sticker);
+    if (selectedSticker?.alt === sticker?.alt)
+    {
+    setSelectedSticker(null);
+    setPreviewSticker(null);
+    }
+    else
+    {
+        setSelectedSticker((prevSticker) => (prevSticker === sticker ? null : sticker));
+    }
   };
 
   const handleMouseMove = (event) => {
-  if (selectedSticker) {
-    const x = event.clientX - (10.5 * window.innerWidth) / 200; 
-    const y = event.clientY - (10.5 * window.innerHeight) / 200; 
+    if (selectedSticker) {
+      const x = event.clientX - (10.5 * window.innerWidth) / 200;
+      const y = event.clientY - (10.5 * window.innerHeight) / 200;
 
-    setPreviewSticker({ sticker: selectedSticker, x, y });
-  }
-};
+      setPreviewSticker({ sticker: selectedSticker, x, y });
+    }
+  };
 
- const handleTopContainerClick = (event) => {
-  if (selectedSticker) {
-    const x = event.clientX - (10.5 * window.innerWidth) / 200; 
-    const y = event.clientY - (10.5 * window.innerHeight) / 200; 
+  const handleTopContainerClick = (event) => {
+    if (selectedSticker) {
+      const x = event.clientX - (10.5 * window.innerWidth) / 200;
+      const y = event.clientY - (10.5 * window.innerHeight) / 200;
 
-    setPlacedStickers([...placedStickers, { sticker: selectedSticker, x, y }]);
-    setPreviewSticker(null);
-  }
-};
+      setPlacedStickers([...placedStickers, { sticker: selectedSticker, x, y }]);
+  
+    }
+  };
 
-const undoLastSticker = () => {
-  setPlacedStickers((prevStickers) => {
-    const updatedStickers = [...prevStickers];
-    updatedStickers.pop();
-    return updatedStickers;
-  });
-};
+  const undoLastSticker = () => {
+    setPlacedStickers((prevStickers) => {
+      const updatedStickers = [...prevStickers];
+      updatedStickers.pop();
+      return updatedStickers;
+    });
+  };
+
   const handleKeyDown = (event) => {
     if (event.shiftKey) {
       switch (event.key) {
         case 'B':
-        setButtonsVisible(!buttonsVisible);
-        break;
+          setButtonsVisible(!buttonsVisible);
+          break;
         case 'C':
           setPlacedStickers([]);
           break;
@@ -96,16 +106,15 @@ const undoLastSticker = () => {
           downloadImage();
           break;
         case 'Z':
-        undoLastSticker();
-        break;
+          undoLastSticker();
+          break;
         default:
           break;
       }
     }
   };
 
-
-   const downloadImage = () => {
+  const downloadImage = () => {
     const topContainer = document.getElementById('container-fluid');
 
     if (topContainer) {
@@ -115,10 +124,9 @@ const undoLastSticker = () => {
         });
       });
     } else {
-
+      // Handle case when topContainer is not found
     }
   };
-
 
   const handleContainerEnter = () => {
     setIsCursorInside(true);
@@ -128,6 +136,34 @@ const undoLastSticker = () => {
     setIsCursorInside(false);
   };
 
+  const handleContainerStickerClick = (event, sticker) => {
+    const rect = event.target.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    if (selectedSticker === sticker) {
+      setPreviewSticker(null);
+    } else {
+      setSelectedSticker(sticker);
+      setPreviewSticker({ sticker, x, y });
+    }
+  };
+
+  const handleStickerDrag = (event) => {
+    if (selectedSticker) {
+      const rect = event.target.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      setPreviewSticker((prevPreviewSticker) => ({ ...prevPreviewSticker, x, y }));
+    }
+  };
+
+  const handleStickerRelease = () => {
+    if (selectedSticker && previewSticker) {
+      setPlacedStickers([...placedStickers, previewSticker]);
+      setPreviewSticker(null);
+ 
+    }
+  };
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
@@ -135,9 +171,10 @@ const undoLastSticker = () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [handleKeyDown]);
+
   return (
     <div className="App" onMouseMove={handleMouseMove}>
-     <div
+      <div
         className={`container-fluid ${containerClass}`}
         id="container-fluid"
         style={{
@@ -163,6 +200,9 @@ const undoLastSticker = () => {
               top: `${placedSticker.y}px`,
               opacity: 1,
             }}
+            onClick={(event) => handleContainerStickerClick(event, placedSticker.sticker)}
+            onMouseDown={handleStickerDrag}
+            onMouseUp={handleStickerRelease}
           />
         ))}
         {previewSticker && (
@@ -178,79 +218,88 @@ const undoLastSticker = () => {
               top: `${previewSticker.y}px`,
               opacity: isCursorInside ? 0.5 : 0,
             }}
+            onMouseDown={handleStickerDrag}
+            onMouseUp={handleStickerRelease}
           />
         )}
       </div>
 
- 
-
       <div>
-       <div className="row" style={{ backgroundColor: '#282c34',  }}>
-      <div className="col-md-6">
-        <button
-          className={`btn btn-${view === 'stickers' ? 'primary' : 'secondary'} btn-block` }
-          style={{visibility: buttonsVisible ? 'visible' : 'hidden', width: '20vw', fontSize: '3vh'}}
-          onClick={() => {
-            setView('stickers');
-          }}
-        >
-          Stickers
-        </button>
+        <div className="row" style={{ backgroundColor: '#282c34' }}>
+          <div className="col-md-6">
             <button
-          className={`btn btn-${view === 'stickers' ? 'secondary' : 'secondary'} btn-block` }
-          style={{visibility: buttonsVisible ? 'visible' : 'hidden', width: '10vw', fontSize: '3vh'}}
-          onClick={() => {
-            downloadImage();
-          }}
-        >
-     <Icon icon="material-symbols:download" />
-           </button>
-      </div>
-      <div className="col-md-6" style={{visibility: buttonsVisible ? 'visible' : 'hidden'}}>
-        <button
-          className={`btn btn-${view === 'backgrounds' ? 'primary' : 'secondary'} btn-block`}
-          onClick={() => setView('backgrounds')}
-          style={{visibility: buttonsVisible ? 'visible' : 'hidden', width: '20vw', fontSize: '3vh'}}
-        >
-          Backgrounds
-        </button>
-          <button
-          className={`btn btn-${view === 'stickers' ? 'secondary' : 'secondary'} btn-block` }
-          style={{visibility: buttonsVisible ? 'visible' : 'hidden', width: '10vw', fontSize: '3vh'}}
-          onClick={() => {
-            setPlacedStickers([]);
-          }}
-        >
-     <Icon icon="mdi:broom" />
-           </button>
-      </div>
-    </div>
-      <div className="container-fixed-bottom">
-        <div className="row mt-3">
-          {view === 'stickers' &&
-            stickers.map((sticker, index) => (
-              <div key={index} className="col-md-2">
-                <img
-                  src={sticker.src}
-                  alt={sticker.alt}
-                  className={`image clickable ${selectedSticker === sticker ? 'selected' : ''}`}
-                  onClick={() => handleStickerClick(sticker)}
-                  style={selectedSticker && selectedSticker.alt === sticker.alt ? { border: '2px solid white' } : {}}
-                />
-              </div>
-            ))}
-          {view === 'backgrounds' &&
-            backgrounds.map((background, index) => (
-              <div
-                key={index}
-                className={`col-md-2 clickable ${selectedBackground === background ? 'selected' : ''}`}
-                onClick={() => handleBackgroundClick(background)}
-              >
-                <img src={background.src} alt={background.alt} className="image" />
-              </div>
-            ))}
+              className={`btn btn-${view === 'stickers' ? 'primary' : 'secondary'} btn-block`}
+              style={{ visibility: buttonsVisible ? 'visible' : 'hidden', width: '20vw', fontSize: '3vh' }}
+              onClick={() => {
+                setView('stickers');
+              }}
+            >
+              Stickers
+            </button>
+            <button
+              className={`btn btn-${view === 'stickers' ? 'secondary' : 'secondary'} btn-block`}
+              style={{ visibility: buttonsVisible ? 'visible' : 'hidden', width: '10vw', fontSize: '3vh' }}
+              onClick={() => {
+                downloadImage();
+              }}
+            >
+              <Icon icon="material-symbols:download" />
+            </button>
+          </div>
+          <div className="col-md-6" style={{ visibility: buttonsVisible ? 'visible' : 'hidden' }}>
+            <button
+              className={`btn btn-${view === 'stickers' ? 'secondary' : 'secondary'} btn-block`}
+              style={{ visibility: buttonsVisible ? 'visible' : 'hidden', width: '10vw', fontSize: '3vh' }}
+              onClick={() => {
+                undoLastSticker([]);
+              }}
+            >
+              <Icon icon="material-symbols:undo" />
+            </button>
+            <button
+              className={`btn btn-${view === 'backgrounds' ? 'primary' : 'secondary'} btn-block`}
+              onClick={() => setView('backgrounds')}
+              style={{ visibility: buttonsVisible ? 'visible' : 'hidden', width: '20vw', fontSize: '3vh' }}
+            >
+              Backgrounds
+            </button>
+            <button
+              className={`btn btn-${view === 'stickers' ? 'secondary' : 'secondary'} btn-block`}
+              style={{ visibility: buttonsVisible ? 'visible' : 'hidden', width: '10vw', fontSize: '3vh' }}
+              onClick={() => {
+                setPlacedStickers([]);
+              }}
+            >
+              <Icon icon="mdi:broom" />
+            </button>
+          </div>
         </div>
-      </div>
+        <div className="container-fixed-bottom">
+          <div className="row mt-3">
+            {view === 'stickers' &&
+              stickers.map((sticker, index) => (
+                <div key={index} className="col-md-2">
+                  <img
+                    src={sticker.src}
+                    alt={sticker.alt}
+                    className={`image clickable ${selectedSticker === sticker ? 'selected' : ''}`}
+                    onClick={(event) => handleStickerClick(sticker)}
+                    style={selectedSticker && selectedSticker.alt === sticker.alt ? { border: '2px solid white' } : {}}
+                  />
+                </div>
+              ))}
+            {view === 'backgrounds' &&
+              backgrounds.map((background, index) => (
+                <div
+                  key={index}
+                  className={`col-md-2 clickable ${selectedBackground === background ? 'selected' : ''}`}
+                  onClick={() => handleBackgroundClick(background)}
+                >
+                  <img src={background.src} alt={background.alt} className="imageB" />
+                </div>
+              ))}
+          </div>
+        </div>
       </div>
     </div>
   );
