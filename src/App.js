@@ -3,6 +3,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
+import { Icon } from '@iconify/react';
+
 function App() {
   const backgroundContext = require.context('./Backgrounds', false, /\.(png|jpe?g|svg)$/);
   const stickerContext = require.context('./Stickers', false, /\.(png|jpe?g|svg)$/);
@@ -194,6 +196,15 @@ const undoLastSticker = () => {
         >
           Stickers
         </button>
+            <button
+          className={`btn btn-${view === 'stickers' ? 'secondary' : 'secondary'} btn-block` }
+          style={{visibility: buttonsVisible ? 'visible' : 'hidden', width: '10vw', fontSize: '3vh'}}
+          onClick={() => {
+            downloadImage();
+          }}
+        >
+     <Icon icon="material-symbols:download" />
+           </button>
       </div>
       <div className="col-md-6" style={{visibility: buttonsVisible ? 'visible' : 'hidden'}}>
         <button
@@ -203,6 +214,15 @@ const undoLastSticker = () => {
         >
           Backgrounds
         </button>
+          <button
+          className={`btn btn-${view === 'stickers' ? 'secondary' : 'secondary'} btn-block` }
+          style={{visibility: buttonsVisible ? 'visible' : 'hidden', width: '10vw', fontSize: '3vh'}}
+          onClick={() => {
+            setPlacedStickers([]);
+          }}
+        >
+     <Icon icon="mdi:broom" />
+           </button>
       </div>
     </div>
       <div className="container-fixed-bottom">
