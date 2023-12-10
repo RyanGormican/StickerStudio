@@ -187,7 +187,7 @@ const undoLastSticker = () => {
       <div className="col-md-6">
         <button
           className={`btn btn-${view === 'stickers' ? 'primary' : 'secondary'} btn-block` }
-          style={{visibility: buttonsVisible ? 'visible' : 'hidden'}}
+          style={{visibility: buttonsVisible ? 'visible' : 'hidden', width: '20vw', fontSize: '3vh'}}
           onClick={() => {
             setView('stickers');
           }}
@@ -199,6 +199,7 @@ const undoLastSticker = () => {
         <button
           className={`btn btn-${view === 'backgrounds' ? 'primary' : 'secondary'} btn-block`}
           onClick={() => setView('backgrounds')}
+          style={{visibility: buttonsVisible ? 'visible' : 'hidden', width: '20vw', fontSize: '3vh'}}
         >
           Backgrounds
         </button>
