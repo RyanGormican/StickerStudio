@@ -18,6 +18,8 @@ function App() {
   const [isCursorInside, setIsCursorInside] = useState(false);
   const [containerClass, setContainerClass] = useState('');
   const [buttonsVisible, setButtonsVisible] = useState(true);
+  const [clickMode, setClickMode] = useState('place');
+  const [selectedStickerIndex, setSelectedStickerIndex] = useState(null);
 
   const backgrounds = backgroundContext.keys().map((key, index) => ({
     src: backgroundContext(key),
@@ -53,21 +55,33 @@ function App() {
     }
   };
 
-  const handleStickerClick = (sticker) => {
-    if (selectedSticker?.alt == sticker.alt)
-    {
-    setSelectedSticker(null);
-    setPreviewSticker(null);
-    }else
-    {
-    if (!selectedSticker || selectedSticker.alt !== sticker.alt) {
-      setSelectedSticker(sticker);
+  const handleStickerClick = (sticker, index) => {
+    if (clickMode === 'erase') {
+      setPlacedStickers((prevStickers) => {
+        const updatedStickers = [...prevStickers];
+        updatedStickers.splice(index, 1);
+        return updatedStickers;
+      });
+    } else {
+      setSelectedStickerIndex(index);
+      setSelectedSticker(selectedStickerIndex === index ? null : sticker);
       setPreviewSticker(null);
     }
+  };
+   const handleMouseMove = (event) => {
+    if (clickMode === 'erase') return;
+
+    if (selectedSticker) {
+      const x = event.clientX - (10.5 * window.innerWidth) / 200;
+      const y = event.clientY - (10.5 * window.innerHeight) / 200;
+
+      setPreviewSticker({ sticker: selectedSticker, x, y });
     }
   };
 
-  const handleContainerStickerMouseDown = (event, sticker) => {
+  const handleContainerStickerMouseDown = (event, sticker, index) => {
+    if (clickMode === 'erase') return;
+
     const rect = event.target.getBoundingClientRect();
     const offsetX = event.clientX - rect.left;
     const offsetY = event.clientY - rect.top;
@@ -77,6 +91,8 @@ function App() {
   };
 
   const handleContainerStickerMouseMove = (event, sticker, offsetX, offsetY) => {
+    if (clickMode === 'erase') return;
+
     const x = event.clientX - offsetX;
     const y = event.clientY - offsetY;
 
@@ -84,6 +100,8 @@ function App() {
   };
 
   const handleContainerStickerMouseUp = () => {
+    if (clickMode === 'erase') return;
+
     document.removeEventListener('mousemove', handleContainerStickerMouseMove);
     document.removeEventListener('mouseup', handleContainerStickerMouseUp);
 
@@ -94,21 +112,35 @@ function App() {
     }
   };
 
-  const handleMouseMove = (event) => {
-    if (selectedSticker) {
-      const x = event.clientX - (10.5 * window.innerWidth) / 200;
-      const y = event.clientY - (10.5 * window.innerHeight) / 200;
-
-      setPreviewSticker({ sticker: selectedSticker, x, y });
-    }
-  };
-
   const handleTopContainerClick = (event) => {
-    if (selectedSticker) {
-      const x = event.clientX - (10.5 * window.innerWidth) / 200;
-      const y = event.clientY - (10.5 * window.innerHeight) / 200;
+    if (clickMode === 'place') {
+      if (selectedSticker) {
+        const x = event.clientX - (10.5 * window.innerWidth) / 200;
+        const y = event.clientY - (10.5 * window.innerHeight) / 200;
 
-      setPlacedStickers([...placedStickers, { sticker: selectedSticker, x, y }]);
+        setPlacedStickers([...placedStickers, { sticker: selectedSticker, x, y }]);
+      }
+    } else if (clickMode === 'erase') {
+      const clickedStickerIndex = placedStickers.findIndex(
+        (placedSticker) => {
+          const rect = event.target.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+
+          return (
+            x >= placedSticker.x &&
+            x <= placedSticker.x + (10.5 * window.innerWidth) / 200 &&
+            y >= placedSticker.y &&
+            y <= placedSticker.y + (10.5 * window.innerHeight) / 200
+          );
+        }
+      );
+
+      if (clickedStickerIndex !== -1) {
+        const updatedStickers = [...placedStickers];
+        updatedStickers.splice(clickedStickerIndex, 1);
+        setPlacedStickers(updatedStickers);
+      }
     }
   };
 
@@ -134,6 +166,12 @@ function App() {
           break;
         case 'Z':
           undoLastSticker();
+          break;
+        case 'P':
+          setClickMode('place');
+          break;
+        case 'E':
+          setClickMode('erase');
           break;
         default:
           break;
@@ -184,12 +222,13 @@ function App() {
         onMouseEnter={handleContainerEnter}
         onMouseLeave={handleContainerLeave}
       >
+        {/* Render placed stickers in erase mode */}
         {placedStickers.map((placedSticker, index) => (
           <img
             key={index}
             src={placedSticker.sticker.src}
             alt={placedSticker.sticker.alt}
-            className="selected-sticker"
+            className={`selected-sticker ${clickMode === 'erase' ? 'erase-mode' : ''}`}
             style={{
               position: 'absolute',
               width: '10.5vw',
@@ -198,10 +237,11 @@ function App() {
               top: `${placedSticker.y}px`,
               opacity: 1,
             }}
-            onMouseDown={(e) => handleContainerStickerMouseDown(e, placedSticker.sticker)}
+            onMouseDown={(e) => handleContainerStickerMouseDown(e, placedSticker.sticker, index)}
           />
         ))}
-        {previewSticker && (
+        {/* Render preview sticker only in place mode */}
+        {previewSticker && clickMode !== 'erase' && (
           <img
             src={previewSticker.sticker.src}
             alt={previewSticker.sticker.alt}
@@ -241,11 +281,29 @@ function App() {
             >
               <Icon icon="material-symbols:download" />
             </button>
+            <button
+              className={`btn btn-${clickMode === 'erase' ? 'primary' : 'secondary'} btn-block`}
+              style={{ visibility: buttonsVisible ? 'visible' : 'hidden', width: '10vw', fontSize: '3vh' }}
+              onClick={() => {
+                setClickMode('erase');
+              }}
+            >
+              <Icon icon="iconoir:erase" />
+            </button>
           </div>
           <div className="col-md-6" style={{ visibility: buttonsVisible ? 'visible' : 'hidden' }}>
             <button
-              className={`btn btn-${view === 'stickers' ? 'secondary' : 'secondary'} btn-block`}
+              className={`btn btn-${clickMode === 'place' ? 'primary' : 'secondary'} btn-block`}
               style={{ visibility: buttonsVisible ? 'visible' : 'hidden', width: '10vw', fontSize: '3vh' }}
+              onClick={() => {
+                setClickMode('place');
+              }}
+            >
+              <Icon icon="mingcute:hand-fill" />
+            </button>
+            <button
+              className={`btn btn-${view === 'stickers' ? 'secondary' : 'secondary'} btn-block`}
+              style={{ visibility: buttonsVisible ? 'visible' : 'hidden', width: '7.5vw', fontSize: '3vh' }}
               onClick={() => {
                 undoLastSticker([]);
               }}
@@ -278,8 +336,8 @@ function App() {
                   <img
                     src={sticker.src}
                     alt={sticker.alt}
-                    className={`image clickable ${selectedSticker === sticker ? 'selected' : ''}`}
-                    onClick={(event) => handleStickerClick(sticker)}
+                    className={`image clickable ${selectedStickerIndex === index ? 'selected' : ''}`}
+                    onClick={() => handleStickerClick(sticker, index)}
                     style={selectedSticker && selectedSticker.alt === sticker.alt ? { border: '2px solid white' } : {}}
                   />
                 </div>
