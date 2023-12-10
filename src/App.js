@@ -18,6 +18,7 @@ function App() {
   const [isCursorInside, setIsCursorInside] = useState(false);
   const [containerClass, setContainerClass] = useState('');
   const [buttonsVisible, setButtonsVisible] = useState(true);
+
   const backgrounds = backgroundContext.keys().map((key, index) => ({
     src: backgroundContext(key),
     alt: `Background ${index + 1}`,
@@ -53,16 +54,43 @@ function App() {
   };
 
   const handleStickerClick = (sticker) => {
-  console.log(selectedSticker);
-  console.log(sticker);
-    if (selectedSticker?.alt === sticker?.alt)
+    if (selectedSticker?.alt == sticker.alt)
     {
     setSelectedSticker(null);
     setPreviewSticker(null);
-    }
-    else
+    }else
     {
-        setSelectedSticker((prevSticker) => (prevSticker === sticker ? null : sticker));
+    if (!selectedSticker || selectedSticker.alt !== sticker.alt) {
+      setSelectedSticker(sticker);
+      setPreviewSticker(null);
+    }
+    }
+  };
+
+  const handleContainerStickerMouseDown = (event, sticker) => {
+    const rect = event.target.getBoundingClientRect();
+    const offsetX = event.clientX - rect.left;
+    const offsetY = event.clientY - rect.top;
+
+    document.addEventListener('mousemove', (e) => handleContainerStickerMouseMove(e, sticker, offsetX, offsetY));
+    document.addEventListener('mouseup', handleContainerStickerMouseUp);
+  };
+
+  const handleContainerStickerMouseMove = (event, sticker, offsetX, offsetY) => {
+    const x = event.clientX - offsetX;
+    const y = event.clientY - offsetY;
+
+    setPreviewSticker({ sticker, x, y });
+  };
+
+  const handleContainerStickerMouseUp = () => {
+    document.removeEventListener('mousemove', handleContainerStickerMouseMove);
+    document.removeEventListener('mouseup', handleContainerStickerMouseUp);
+
+    if (selectedSticker && previewSticker) {
+      setPlacedStickers([...placedStickers, previewSticker]);
+      setSelectedSticker(null);
+      setPreviewSticker(null);
     }
   };
 
@@ -81,7 +109,6 @@ function App() {
       const y = event.clientY - (10.5 * window.innerHeight) / 200;
 
       setPlacedStickers([...placedStickers, { sticker: selectedSticker, x, y }]);
-  
     }
   };
 
@@ -136,35 +163,6 @@ function App() {
     setIsCursorInside(false);
   };
 
-  const handleContainerStickerClick = (event, sticker) => {
-    const rect = event.target.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    if (selectedSticker === sticker) {
-      setPreviewSticker(null);
-    } else {
-      setSelectedSticker(sticker);
-      setPreviewSticker({ sticker, x, y });
-    }
-  };
-
-  const handleStickerDrag = (event) => {
-    if (selectedSticker) {
-      const rect = event.target.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      setPreviewSticker((prevPreviewSticker) => ({ ...prevPreviewSticker, x, y }));
-    }
-  };
-
-  const handleStickerRelease = () => {
-    if (selectedSticker && previewSticker) {
-      setPlacedStickers([...placedStickers, previewSticker]);
-      setPreviewSticker(null);
- 
-    }
-  };
-
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => {
@@ -200,9 +198,7 @@ function App() {
               top: `${placedSticker.y}px`,
               opacity: 1,
             }}
-            onClick={(event) => handleContainerStickerClick(event, placedSticker.sticker)}
-            onMouseDown={handleStickerDrag}
-            onMouseUp={handleStickerRelease}
+            onMouseDown={(e) => handleContainerStickerMouseDown(e, placedSticker.sticker)}
           />
         ))}
         {previewSticker && (
@@ -218,8 +214,8 @@ function App() {
               top: `${previewSticker.y}px`,
               opacity: isCursorInside ? 0.5 : 0,
             }}
-            onMouseDown={handleStickerDrag}
-            onMouseUp={handleStickerRelease}
+            onMouseMove={(e) => handleContainerStickerMouseMove(e, previewSticker.sticker, 0, 0)}
+            onMouseUp={handleContainerStickerMouseUp}
           />
         )}
       </div>
