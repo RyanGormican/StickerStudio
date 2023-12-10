@@ -240,7 +240,7 @@ function App() {
             onMouseDown={(e) => handleContainerStickerMouseDown(e, placedSticker.sticker, index)}
           />
         ))}
-        {/* Render preview sticker only in place mode */}
+
         {previewSticker && clickMode !== 'erase' && (
           <img
             src={previewSticker.sticker.src}
